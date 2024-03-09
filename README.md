@@ -31,6 +31,7 @@ Homeworks:
 - [1: SKI Calculus](/hw1/hw1.pdf)
 - [2: Lambda Calculus](/hw2/hw2.pdf)
 - [3: Simply-typed Lambda Calculus](/hw3/hw3.pdf)
+- [3b (bonus): Hindley-Milner Type Inference](/hw3b/) - Not part of the original course
 - [4: Object Calculus](/hw4/hw4.pdf)
 - [5: Type State](/hw5/hw5.pdf)
 - [6: Continuations](/hw6/hw6.pdf)
