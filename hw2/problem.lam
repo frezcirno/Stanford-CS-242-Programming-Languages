@@ -29,12 +29,16 @@ def nil  = \f.\x. x;
 # TASK: Implement the following functions.
 
 # BEGIN_YOUR_CODE
-def is_zero  = \n. n;
-def len      = \l. l;
-def num_zero = \l. l;
-def fib      = \n. n;
-def dec      = \n. n;
-def half     = \n. n;
+# 真难写orzorz...
+def is_zero  = \n. n (\x. ff) tt;
+def len      = \l. l (\x. inc) _0;
+def num_zero = \l. l (\x. is_zero x inc \x.x) _0;
+def _add     = \m. \n. m inc n;
+def fib      = \n. fst (n (\p. pair (snd p) (_add (fst p) (snd p))) (pair _1 _2));
+def dec      = \n. fst (n (\p. pair (snd p) (inc (snd p))) (pair _0 _0));
+def _not     = \b. b ff tt;
+def _is_odd  = \n. n _not ff;
+def half     = \n. fst (n (\p. pair (_is_odd (snd p) (inc (fst p)) (fst p)) (inc (snd p))) (pair _0 _0));
 # END_YOUR_CODE
 
 #########
