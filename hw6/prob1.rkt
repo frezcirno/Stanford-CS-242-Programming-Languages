@@ -41,9 +41,25 @@
 ; Note: You can define any other helper functions.
 
 (define (throw msg)
-  (void)
+  (if (stack_empty?)
+    (
+      (printf "ThrowError\n")
+      (exit)
+    )
+    (let* ([k_and_f (stack_pop)] [k (first k_and_f)] [except_f (second k_and_f)])
+      (k (except_f msg))
+    )
+  )
 )
 
 (define (try_except try_f except_f)
-  (void)
+  (call/cc
+    (lambda (k)
+      (stack_push (list k except_f))
+      (let ([r (try_f)])
+        (stack_pop)
+        (k r)
+      )
+    )
+  )
 )
