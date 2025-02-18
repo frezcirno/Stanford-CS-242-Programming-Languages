@@ -23,8 +23,102 @@ use crate::prob1::server::internal_login;
 // Here T denotes a type. Note that each T can be a different type.
 //===== BEGIN_CODE =====//
 pub struct Cart {}
-pub struct Empty {}
-pub struct NonEmpty {}
-pub struct Checkout {}
+
+impl Cart {
+    pub fn login(id: String, pw: String) -> Result<Empty, ()> {
+        match internal_login(id, pw) {
+            Some(acct_num) => Ok(Empty {
+                acct_num,
+                tot_cost: 0,
+            }),
+            None => Err(()),
+        }
+    }
+}
+
+pub struct Empty {
+    acct_num: u32,
+    tot_cost: u32,
+}
+
+impl Empty {
+    pub fn add_item(self, item: u32) -> NonEmpty {
+        NonEmpty {
+            acct_num: self.acct_num,
+            items: vec![item],
+        }
+    }
+
+    pub fn acct_num(&self) -> u32 {
+        self.acct_num
+    }
+
+    pub fn tot_cost(&self) -> u32 {
+        self.tot_cost
+    }
+}
+
+pub struct NonEmpty {
+    acct_num: u32,
+    items: Vec<u32>,
+}
+
+impl NonEmpty {
+    pub fn add_item(mut self, item: u32) -> NonEmpty {
+        self.items.push(item);
+        self
+    }
+
+    pub fn clear_items(self) -> Empty {
+        Empty {
+            acct_num: self.acct_num,
+            tot_cost: 0,
+        }
+    }
+
+    pub fn checkout(self) -> Checkout {
+        Checkout {
+            acct_num: self.acct_num,
+            items: self.items,
+        }
+    }
+
+    pub fn acct_num(&self) -> u32 {
+        self.acct_num
+    }
+
+    pub fn tot_cost(&self) -> u32 {
+        self.items.iter().sum()
+    }
+}
+
+pub struct Checkout {
+    acct_num: u32,
+    items: Vec<u32>,
+}
+
+impl Checkout {
+    pub fn cancel(self) -> NonEmpty {
+        NonEmpty {
+            acct_num: self.acct_num,
+            items: self.items,
+        }
+    }
+
+    pub fn order(self) -> Empty {
+        Empty {
+            acct_num: self.acct_num,
+            tot_cost: 0,
+        }
+    }
+
+    pub fn acct_num(&self) -> u32 {
+        self.acct_num
+    }
+
+    pub fn tot_cost(&self) -> u32 {
+        self.items.iter().sum()
+    }
+}
 
 //===== END_CODE =====//

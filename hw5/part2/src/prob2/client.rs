@@ -25,8 +25,99 @@ use crate::prob2::server::{internal_send_pkts, internal_send_sig, Server};
 // Here T denotes a type. Note that each T can be a different type.
 //===== BEGIN_CODE =====//
 pub struct Client {}
+
+impl Client {
+    pub fn new() -> Initial {
+        Initial {}
+    }
+}
+
 pub struct Initial {}
-pub struct Syned {}
-pub struct SynAcked {}
-pub struct Closed {}
+
+impl Initial {
+    pub fn send_syn(self, server: &mut Server) -> Result<Syned, Initial> {
+        match internal_send_sig(server, Sig::Syn) {
+            Some(sig) => match sig {
+                Sig::SynAck => Ok(Syned { ids_sent: vec![] }),
+                _ => Err(self),
+            },
+            None => Err(self),
+        }
+    }
+
+    pub fn ids_sent(&self) -> Vec<u32> {
+        vec![]
+    }
+}
+
+pub struct Syned {
+    ids_sent: Vec<u32>,
+}
+
+impl Syned {
+    pub fn send_ack(self, server: &mut Server) -> SynAcked {
+        internal_send_sig(server, Sig::Ack);
+        SynAcked { ids_sent: vec![] }
+    }
+
+    pub fn ids_sent(&self) -> Vec<u32> {
+        self.ids_sent.clone()
+    }
+}
+
+pub struct SynAcked {
+    ids_sent: Vec<u32>,
+}
+
+impl SynAcked {
+    pub fn send_pkts(mut self, server: &mut Server, pkts: &Vec<Pkt>) -> SynAcked {
+        for pkt in pkts {
+            let mut ok = internal_send_pkts(server, &vec![*pkt]);
+            loop {
+                if ok.contains(&pkt.id) {
+                    self.ids_sent.push(pkt.id);
+                    break;
+                }
+                ok = internal_send_pkts(server, &vec![*pkt]);
+            }
+        }
+        self
+    }
+
+    pub fn send_close(self, server: &mut Server) -> Result<Closed, SynAcked> {
+        let mut r = internal_send_sig(server, Sig::Close);
+        loop {
+            match r {
+                Some(Sig::CloseAck) => {
+                    return Ok(Closed {
+                        ids_sent: self.ids_sent,
+                    });
+                }
+                _ => {
+                    r = internal_send_sig(server, Sig::Close);
+                }
+            }
+        }
+    }
+
+    pub fn ids_sent(&self) -> Vec<u32> {
+        self.ids_sent.clone()
+    }
+}
+
+pub struct Closed {
+    ids_sent: Vec<u32>,
+}
+
+impl Closed {
+    pub fn send_ack(self, server: &mut Server) -> Initial {
+        internal_send_sig(server, Sig::Ack);
+        Initial {}
+    }
+
+    pub fn ids_sent(&self) -> Vec<u32> {
+        self.ids_sent.clone()
+    }
+}
+
 //===== END_CODE =====//

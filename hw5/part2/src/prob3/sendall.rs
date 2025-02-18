@@ -40,7 +40,14 @@ pub fn send_all(server: &mut Server, pkts: &Vec<Pkt>) {
 fn try_syn(server: &mut Server, client: Initial) -> Syned {
     // TODO: Implement this function
     //===== BEGIN_CODE =====//
-    unimplemented!()
+    server.is_connected();
+    let mut r = client.send_syn(server);
+    loop {
+        match r {
+            Ok(syned) => return syned,
+            Err(c) => r = c.send_syn(server),
+        }
+    }
     //===== END_CODE =====//
 }
 
@@ -49,7 +56,7 @@ fn try_syn(server: &mut Server, client: Initial) -> Syned {
 fn try_pkts(server: &mut Server, client: SynAcked, pkts: &Vec<Pkt>) -> SynAcked {
     // TODO: Implement this function
     //===== BEGIN_CODE =====//
-    unimplemented!()
+    client.send_pkts(server, pkts)
     //===== END_CODE =====//
 }
 
@@ -58,6 +65,9 @@ fn try_pkts(server: &mut Server, client: SynAcked, pkts: &Vec<Pkt>) -> SynAcked 
 fn try_close(server: &mut Server, client: SynAcked) -> Closed {
     // TODO: Implement this function
     //===== BEGIN_CODE =====//
-    unimplemented!()
+    match client.send_close(server) {
+        Ok(closed) => closed,
+        Err(_) => panic!("Failed to close the connection"),
+    }
     //===== END_CODE =====//
 }
